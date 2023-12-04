@@ -1,7 +1,7 @@
 import { BoolControl } from "comps/controls/boolControl";
 import { ColorOrBoolCodeControl, NumberControl, RadiusControl, StringControl } from "comps/controls/codeControl";
 import { dropdownControl, HorizontalAlignmentControl } from "comps/controls/dropdownControl";
-import { MultiCompBuilder, stateComp, valueComp, withContext, withDefault, withViewFn } from "comps/generators";
+import { MultiCompBuilder, stateComp, valueComp, withContext, withDefault } from "comps/generators";
 import { withSelectedMultiContext } from "comps/generators/withSelectedMultiContext";
 import { genRandomKey } from "comps/utils/idGenerator";
 import { trans } from "i18n";
@@ -26,13 +26,9 @@ import { ColumnTypeComp, ColumnTypeCompMap } from "./columnTypeComp";
 import { ColorControl } from "comps/controls/colorControl";
 import { JSONValue } from "util/jsonTypes";
 import styled from "styled-components";
-import { SimpleContainerComp } from "../../containerBase/simpleContainerComp";
-import { CompTree, IContainer } from "../../containerBase";
-import { NameGenerator } from "@lowcoder-ee/comps/utils";
 
 export type Render = ReturnType<ConstructorToComp<typeof RenderComp>["getOriginalComp"]>;
 export const RenderComp = withSelectedMultiContext(ColumnTypeComp);
-const ContextContainerTmpComp = withSelectedMultiContext(SimpleContainerComp);
 
 const columnWidthOptions = [
   {
@@ -107,8 +103,7 @@ export const columnChildrenMap = {
   borderWidth: withDefault(RadiusControl, ""),
   radius: withDefault(RadiusControl, ""),
   textSize: withDefault(RadiusControl, ""),
-  cellColor: CellColorComp,
-  container: ContextContainerTmpComp,
+  cellColor: CellColorComp, 
 };
 
 const StyledIcon = styled.span`
@@ -135,25 +130,7 @@ const ColumnInitComp = new MultiCompBuilder(columnChildrenMap, (props, dispatch)
   .setPropertyViewFn(() => <></>)
   .build();
 
-class ColumnImpComp extends ColumnInitComp implements IContainer {
-  private getOriginalContainer() {
-    return this.children.container.getSelectedComp().getComp();
-  }
-  realSimpleContainer(key?: string): SimpleContainerComp | undefined {
-    return this.getOriginalContainer().realSimpleContainer(key);
-  }
-  getCompTree(): CompTree {
-    return this.getOriginalContainer().getCompTree();
-  }
-  findContainer(key: string): IContainer | undefined {
-    return this.getOriginalContainer().findContainer(key);
-  }
-  getPasteValue(nameGenerator: NameGenerator): JSONValue {
-    return {
-      ...this.toJsonValue(),
-      container: this.getOriginalContainer().getPasteValue(nameGenerator),
-    };
-  }
+export class ColumnComp extends ColumnInitComp {
   override reduce(action: CompAction) {
     let comp = super.reduce(action);
     if (action.type === CompActionTypes.UPDATE_NODES_V2) {
@@ -281,9 +258,6 @@ class ColumnImpComp extends ColumnInitComp implements IContainer {
     return wrapChildAction("render", RenderComp.setSelectionAction(key));
   }
 }
-
-export const ColumnComp = withViewFn(ColumnImpComp, (comp) => <></>)
-// export const ColumnComp = ColumnImpComp;
 
 export type RawColumnType = ConstructorToView<typeof ColumnComp>;
 export type ColumNodeType = ConstructorToNodeType<typeof ColumnComp>;

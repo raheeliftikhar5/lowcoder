@@ -327,6 +327,7 @@ export function columnsToAntdFormat(
       cellColorFn: column.cellColor,
       onWidthResize: column.onWidthResize,
       render: (value: any, record: RecordType, index: number) => {
+        console.log(column)
         return column
           .render(
             {
