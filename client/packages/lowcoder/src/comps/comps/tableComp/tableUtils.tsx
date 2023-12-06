@@ -12,12 +12,13 @@ import { TableFilter, tableFilterOperatorMap } from "comps/comps/tableComp/table
 import { SortValue, TableOnEventView } from "comps/comps/tableComp/tableTypes";
 import _ from "lodash";
 import { changeChildAction, CompAction, NodeToValue } from "lowcoder-core";
-import { EditableIcon } from "lowcoder-design";
+import { EditableIcon, HintPlaceHolder } from "lowcoder-design";
 import { tryToNumber } from "util/convertUtils";
 import { JSONObject, JSONValue } from "util/jsonTypes";
 import { StatusType } from "./column/columnTypeComps/columnStatusComp";
 import { ColumnListComp, tableDataRowExample } from "./column/tableColumnListComp";
 import { TableColumnStyleType } from "comps/controls/styleControlConstants";
+import { InnerGrid, gridItemCompToGridItems } from "../containerComp/containerView";
 
 export const COLUMN_CHILDREN_KEY = "children";
 export const OB_ROW_ORI_INDEX = "__ob_origin_index";
@@ -328,18 +329,46 @@ export function columnsToAntdFormat(
       onWidthResize: column.onWidthResize,
       render: (value: any, record: RecordType, index: number) => {
         console.log(column)
-        return column
-          .render(
-            {
-              currentCell: value,
-              currentRow: _.omit(record, OB_ROW_ORI_INDEX),
-              currentIndex: index,
-              currentOriginalIndex: tryToNumber(record[OB_ROW_ORI_INDEX]),
-            },
-            String(record[OB_ROW_ORI_INDEX])
-          )
-          .getView()
-          .view({ editable: column.editable, size, candidateTags: tags, candidateStatus: status });
+        // return column.container();
+        // return column
+        //   .render(
+        //     {
+        //       currentCell: value,
+        //       currentRow: _.omit(record, OB_ROW_ORI_INDEX),
+        //       currentIndex: index,
+        //       currentOriginalIndex: tryToNumber(record[OB_ROW_ORI_INDEX]),
+        //     },
+        //     String(record[OB_ROW_ORI_INDEX])
+        //   )
+        //   .getView()
+        //   .view({ editable: column.editable, size, candidateTags: tags, candidateStatus: status });
+        const containerFn = column.container;
+        const containerProps = containerFn(
+          {
+            currentCell: value,
+            currentRow: _.omit(record, OB_ROW_ORI_INDEX),
+            currentIndex: index,
+            currentOriginalIndex: tryToNumber(record[OB_ROW_ORI_INDEX]),
+          },
+          String(record[OB_ROW_ORI_INDEX])
+        ).getView();
+        // return <>{value}</>
+        console.log(containerProps)
+        return (
+          <InnerGrid
+            {...containerProps}
+            items={gridItemCompToGridItems(containerProps.items)}
+            emptyRows={5}
+            hintPlaceholder={HintPlaceHolder}
+            // isDroppable={false}
+            // isDraggable={true}
+            // isResizable={false}
+            // isSelectable={false}
+            // scrollContainerRef={scrollContainerRef}
+            // radius={props.style.radius}
+            // style={props.style}
+          />
+        )
       },
       ...(column.sortable
         ? {

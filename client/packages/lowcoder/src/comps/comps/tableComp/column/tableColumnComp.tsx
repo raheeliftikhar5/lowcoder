@@ -29,6 +29,7 @@ import styled from "styled-components";
 import { SimpleContainerComp } from "../../containerBase/simpleContainerComp";
 import { CompTree, IContainer } from "../../containerBase";
 import { NameGenerator } from "@lowcoder-ee/comps/utils";
+// import { TableColumnView } from "./tableColumnView";
 
 export type Render = ReturnType<ConstructorToComp<typeof RenderComp>["getOriginalComp"]>;
 export const RenderComp = withSelectedMultiContext(ColumnTypeComp);
@@ -135,7 +136,7 @@ const ColumnInitComp = new MultiCompBuilder(columnChildrenMap, (props, dispatch)
   .setPropertyViewFn(() => <></>)
   .build();
 
-class ColumnImpComp extends ColumnInitComp implements IContainer {
+export class ColumnComp extends ColumnInitComp implements IContainer{
   private getOriginalContainer() {
     return this.children.container.getSelectedComp().getComp();
   }
@@ -282,7 +283,7 @@ class ColumnImpComp extends ColumnInitComp implements IContainer {
   }
 }
 
-export const ColumnComp = withViewFn(ColumnImpComp, (comp) => <></>)
+// export const ColumnComp = withViewFn(ColumnImpComp, (comp) => <TableColumnView comp={comp}/>)
 // export const ColumnComp = ColumnImpComp;
 
 export type RawColumnType = ConstructorToView<typeof ColumnComp>;
